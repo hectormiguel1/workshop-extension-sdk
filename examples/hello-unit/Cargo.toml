@@ -1,0 +1,16 @@
+[package]
+name = "hello-unit"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+publish = false
+description = "Example Crux extension unit built on workshop-ext-sdk: a settings toggle, a host storage record and one verified call site"
+
+# `cargo build -p hello-unit --target i686-pc-windows-gnu --profile host-dll`
+# produces `hello_unit.dll`, exporting only `init` and `shutdown`.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+workshop-ext-sdk = { path = "../../crates/workshop-ext-sdk" }

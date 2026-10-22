@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: rustfmt and clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+  test-linux:
+    name: Host tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --workspace
+
+  windows-i686:
+    name: Windows i686 build and tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The 32-bit GNU toolchain runs the tests natively as 32-bit Windows
+      # programs and brings its own MinGW linker.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable-i686-pc-windows-gnu
+          components: clippy
+      - name: Tests (i686-pc-windows-gnu)
+        run: cargo test --workspace
+      - name: Clippy (i686-pc-windows-gnu)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Build hello-unit
+        run: cargo build -p hello-unit --profile host-dll
+      - name: Check its exports
+        run: cargo run -p workshop-ext-sdk --example export_check -- target/host-dll/hello_unit.dll
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hello-unit-i686
+          path: target/host-dll/hello_unit.dll

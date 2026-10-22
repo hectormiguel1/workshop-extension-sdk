@@ -1,0 +1,39 @@
+[package]
+name = "workshop-ext-sdk"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+# The SDK is the public, community-facing part of the workspace: permissive,
+# unlike the proprietary rest. It depends on nothing else in this workspace.
+license = "MIT OR Apache-2.0"
+publish.workspace = true
+description = "SDK for Crux extension units (native DLL mods for the FINAL FANTASY XIII trilogy): the host ABI, safe service wrappers, init/shutdown exports, site verification, settings descriptors and packed storage records"
+readme = "README.md"
+keywords = ["ff13", "modding", "crux", "ffi"]
+categories = ["game-development", "external-ffi-bindings"]
+
+[features]
+# `#[derive(PackedRecord)]` re-exported as `workshop_ext_sdk::PackedRecord`.
+default = ["derive"]
+derive = ["dep:workshop-ext-sdk-derive"]
+
+# No runtime dependency besides the derive macros (MIT OR Apache-2.0).
+[dependencies]
+workshop-ext-sdk-derive = { path = "../workshop-ext-sdk-derive", version = "0.1.0", optional = true }
+
+# Test-only: the Cucumber suite (`--test features`). Never linked into units.
+[dev-dependencies]
+cucumber = "0.23"
+futures = { version = "0.3", default-features = false, features = ["executor"] }
+
+[[test]]
+name = "features"
+harness = false
+
+# The minimal example unit (settings + storage + one call site) is its own
+# package, `examples/hello-unit` at the repository root, so its DLL build never pulls the test-only
+# dev-dependencies above.
+
+# Host utility: `cargo run -p workshop-ext-sdk --example export_check -- unit.dll`.
+[[example]]
+name = "export_check"

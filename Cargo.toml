@@ -1,0 +1,28 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/workshop-ext-sdk",
+    "crates/workshop-ext-sdk-derive",
+    "examples/hello-unit",
+]
+
+[workspace.package]
+authors = ["CrystalWorkshop"]
+edition = "2024"
+rust-version = "1.89"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/hectormiguel1/workshop-extension-sdk"
+# Not on crates.io yet: depend on a release tag of this repository.
+publish = false
+
+# The shipping profile for unit DLLs:
+# `cargo build -p hello-unit --target i686-pc-windows-gnu --profile host-dll`.
+# Panics must unwind: the SDK catches them at the FFI boundary.
+[profile.host-dll]
+inherits = "release"
+incremental = false
+debug = false
+strip = "symbols"
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
